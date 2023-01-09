@@ -1,0 +1,24 @@
+FROM htm-images-registry-registry.cn-hangzhou.cr.aliyuncs.com/public/golang:1.16-base as builder
+ARG GIT_USERNAME
+ARG GIT_PASSWORD
+
+# 将代码复制到容器中
+COPY . /app
+
+RUN export  GOPROXY=https://goproxy.cn
+RUN export  GOPRIVATE=codeup.aliyun.com
+RUN git config --global url.https://$GIT_USERNAME:$GIT_PASSWORD@codeup.aliyun.com.insteadOf https://codeup.aliyun.com
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-s -w' -o user-rpc service/user/rpc/user.go
+WORKDIR /app
+
+#打包
+FROM htm-images-registry-registry.cn-hangzhou.cr.aliyuncs.com/public/centos:7.9-base
+
+COPY user-rpc-dev.yaml /app/user-rpc-dev.yaml
+COPY user-rpc-pro.yaml /app/user-rpc-pro.yaml
+COPY user-rpc-uat.yaml /app/user-rpc-uat.yaml
+
+WORKDIR /app
+COPY --from=builder /app/user-rpc .
+
+CMD ["./user-rpc"]
