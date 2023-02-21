@@ -1,0 +1,63 @@
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	"github.com/PuerkitoBio/goquery"
+	_ "github.com/go-sql-driver/mysql"
+	"log"
+	"net/http"
+)
+
+func main() {
+	resp, err := http.Get("http://datachart.500.com/ssq/history/newinc/history.php?limit=03000&sort=03100")
+	if err != nil {
+		log.Fatalln("get request failed!")
+	}
+	fmt.Println("------")
+	defer resp.Body.Close()
+
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		log.Fatalln("failed to parse response body!")
+	}
+	db, err := sql.Open("mysql", "root:root@tcp(192.3.11.116:3306)/qianxin")
+	if err != nil {
+		fmt.Println("---err2--", err.Error())
+		panic(err)
+	}
+	doc.Find(".t_tr1").Each(func(i int, selection *goquery.Selection) {
+
+		// 将每一条数据，从td标签中取出
+		trSelection := selection.Find("td")
+		//fmt.Println(selection.Find("td").Text())
+		// 获取期数
+		lotteryNum, _ := trSelection.Eq(0).Html()
+
+		// 获取开奖时间
+		lotteryTime, _ := trSelection.Eq(15).Html()
+		// 获取红色球开奖号码
+		lotteryRed1, _ := trSelection.Eq(1).Html()
+		lotteryRed2, _ := trSelection.Eq(2).Html()
+		lotteryRed3, _ := trSelection.Eq(3).Html()
+		lotteryRed4, _ := trSelection.Eq(4).Html()
+		lotteryRed5, _ := trSelection.Eq(5).Html()
+		lotteryRed6, _ := trSelection.Eq(6).Html()
+		// 获取蓝色球开奖号码
+		lotteryBlue, _ := trSelection.Eq(7).Html()
+		// 获取奖金池金额
+		lotteryMoney, _ := trSelection.Eq(9).Html()
+		sqlStr := "INSERT INTO `qianxin`.`suangseqiu` ( `red1`, `red2`, `red3`, `red4`, `red5`, `red6`, `blue`, `bonus_pool`, `drawing_time`, `number`) VALUES (" + lotteryRed1 + ", " + lotteryRed2 + ", " + lotteryRed3 + ", " + lotteryRed4 + ", " + lotteryRed5 + ", " + lotteryRed6 + ", " + lotteryBlue + ", " + lotteryMoney + ", " + lotteryTime + ", " + lotteryNum + ");"
+		query, err := db.Query(sqlStr)
+		if err != nil {
+			fmt.Printf("insert data error: %v\n", err)
+		}
+		var result int
+		c := query.Scan(&result)
+		fmt.Println("----c-----", c)
+		query.Close()
+	})
+
+	fmt.Println("----3--")
+
+}
