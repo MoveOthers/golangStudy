@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	resp, err := http.Get("http://datachart.500.com/ssq/history/newinc/history.php?limit=03000&sort=03100")
+	resp, err := http.Get("http://datachart.500.com/ssq/history/newinc/history.php?start=23019&end=23019")
 	if err != nil {
 		log.Fatalln("get request failed!")
 	}
@@ -24,7 +24,7 @@ func main() {
 	db, err := sql.Open("mysql", "root:root@tcp(192.3.11.116:3306)/qianxin")
 	if err != nil {
 		fmt.Println("---err2--", err.Error())
-		panic(err)
+		panic(any("---dddd"))
 	}
 	doc.Find(".t_tr1").Each(func(i int, selection *goquery.Selection) {
 
@@ -47,14 +47,13 @@ func main() {
 		lotteryBlue, _ := trSelection.Eq(7).Html()
 		// 获取奖金池金额
 		lotteryMoney, _ := trSelection.Eq(9).Html()
-		sqlStr := "INSERT INTO `qianxin`.`suangseqiu` ( `red1`, `red2`, `red3`, `red4`, `red5`, `red6`, `blue`, `bonus_pool`, `drawing_time`, `number`) VALUES (" + lotteryRed1 + ", " + lotteryRed2 + ", " + lotteryRed3 + ", " + lotteryRed4 + ", " + lotteryRed5 + ", " + lotteryRed6 + ", " + lotteryBlue + ", " + lotteryMoney + ", " + lotteryTime + ", " + lotteryNum + ");"
+		sqlStr := "INSERT INTO `suangseqiu` ( `red1`, `red2`, `red3`, `red4`, `red5`, `red6`, `blue`, `bonus_pool`, `drawing_time`, `number`) VALUES (" + lotteryRed1 + ", " + lotteryRed2 + ", " + lotteryRed3 + ", " + lotteryRed4 + ", " + lotteryRed5 + ", " + lotteryRed6 + ", " + lotteryBlue + ", '" + lotteryMoney + "', '" + lotteryTime + "', " + lotteryNum + ");"
 		query, err := db.Query(sqlStr)
 		if err != nil {
 			fmt.Printf("insert data error: %v\n", err)
 		}
 		var result int
-		c := query.Scan(&result)
-		fmt.Println("----c-----", c)
+		query.Scan(&result)
 		query.Close()
 	})
 

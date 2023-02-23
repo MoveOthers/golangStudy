@@ -10,7 +10,7 @@ func main() {
 	rect := new(Test)
 	err := rpc.Register(rect)
 	if err != nil {
-		panic("----结束-----")
+		panic(any("-------结束-----"))
 	}
 	rpc.HandleHTTP()
 	if err := http.ListenAndServe(":8099", nil); err != nil {

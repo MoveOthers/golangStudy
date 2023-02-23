@@ -69,7 +69,7 @@ func (t *Arith) Scan(args string, reply *Reply) (err error) {
 }
 
 func (t *Arith) Error(args *Args, reply *Reply) error {
-	panic("ERROR")
+	panic(any("ERROR"))
 }
 
 func (t *Arith) SleepMilli(args *Args, reply *Reply) error {
