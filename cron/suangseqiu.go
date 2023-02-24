@@ -40,7 +40,7 @@ func main() {
 
 	}
 
-	resp, err := http.Get("http://datachart.500.com/ssq/history/newinc/history.php?start=" + strconv.Itoa(num))
+	resp, err := http.Get("http://datachart.500.com/ssq/history/newinc/history.php?start=" + strconv.Itoa(num) + "&sort=1")
 	//resp, err := http.Get("http://datachart.500.com/ssq/history/newinc/history.php?start=23018" )
 	if err != nil {
 		log.Fatalln("get request failed!")
